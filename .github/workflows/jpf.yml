@@ -43,13 +43,11 @@ jobs:
         directory=$(pwd)
         runjpf_jar="/tmp/jpf-core/build/RunJPF.jar"
         jar_files=$(find "$directory" -type f -name "*.jar")
-
         
         for jar_file in $jar_files; 
         do
             jar_dir=$(dirname "$jar_file")
             main_class=$(unzip -p "$jar_file" META-INF/MANIFEST.MF | grep -i 'Main-Class' | awk -F': ' '{print $2}' | tr -d '\r')
-
             if [ -z "$main_class" ]; then
                 echo "Main class not found in $jar_file, skipping..."
                 continue
