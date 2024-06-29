@@ -40,6 +40,7 @@ jobs:
         ./gradlew buildJars
 
     - name: Install GNU Tools (like timeout for macOS)
+      if: runner.os == 'macOS'
       run: brew install coreutils
         
     - name: Run JPF on JAR files (Linux)
