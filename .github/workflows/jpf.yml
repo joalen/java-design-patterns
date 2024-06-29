@@ -39,7 +39,11 @@ jobs:
         cd /tmp/jpf-core
         ./gradlew buildJars
 
-    - name: Run JPF on JAR files
+    - name: Install GNU Tools (like timeout for macOS)
+      run: brew install coreutils
+        
+    - name: Run JPF on JAR files (Linux)
+      if: runner.os == 'Linux' 
       shell: bash
       run: |
         #!/bin/bash
@@ -55,6 +59,27 @@ jobs:
             if [ -z "$main_class" ]; then
                 continue
             fi
-            command="java -jar $runjpf_jar +classpath=$jar_file $main_class"
+            command="timeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class"
+            $command
+        done
+
+    - name: Run JPF on JAR files (macOS)
+      if: runner.os == 'macOS' 
+      shell: bash
+      run: |
+        #!/bin/bash
+        set +e 
+        
+        directory=$(pwd)
+        runjpf_jar="/tmp/jpf-core/build/RunJPF.jar"
+        jar_files=$(find "$directory" -type f -name "*.jar")
+        for jar_file in $jar_files; 
+        do
+            jar_dir=$(dirname "$jar_file")
+            main_class=$(unzip -p "$jar_file" META-INF/MANIFEST.MF 2>/dev/null | grep -i 'Main-Class' | awk -F': ' '{print $2}' | tr -d '\r')
+            if [ -z "$main_class" ]; then
+                continue
+            fi
+            command="gtimeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class"
             $command
         done
