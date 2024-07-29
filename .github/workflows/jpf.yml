@@ -38,7 +38,6 @@ jobs:
         git clone https://github.com/javapathfinder/jpf-core.git /tmp/jpf-core
         cd /tmp/jpf-core
         ./gradlew buildJars
-
     - name: Install GNU Tools (like timeout for macOS)
       if: runner.os == 'macOS'
       run: brew install coreutils
@@ -49,7 +48,7 @@ jobs:
       run: |
         #!/bin/bash
         set +e 
-        
+        mkdir jpf_reports
         directory=$(pwd)
         runjpf_jar="/tmp/jpf-core/build/RunJPF.jar"
         jar_files=$(find "$directory" -type f -name "*.jar")
@@ -63,14 +62,13 @@ jobs:
             command="timeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class"
             $command > "./jpf_reports/${main_class}_jpf_report.txt"
         done
-
+        
     - name: Run JPF on JAR files (macOS)
       if: runner.os == 'macOS'
       shell: bash
       run: |
         #!/bin/bash
         set +e 
-
         mkdir jpf_reports
         directory=$(pwd)
         runjpf_jar="/tmp/jpf-core/build/RunJPF.jar"
@@ -90,7 +88,6 @@ jobs:
             command="gtimeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class" 
             $command > "./jpf_reports/${main_class}_jpf_report.txt"
         done
-
     - name: Upload JPF reports
       uses: actions/upload-artifact@v4
       with:
