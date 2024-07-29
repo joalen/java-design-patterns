@@ -61,10 +61,11 @@ jobs:
                 continue
             fi
             command="timeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class"
-            $command
+            $command > "./jpf_reports/${main_class}_jpf_report.txt"
         done
 
-    - name: Run JPF on JAR files
+    - name: Run JPF on JAR files (macOS)
+      if: runner.os == 'macOS'
       shell: bash
       run: |
         #!/bin/bash
@@ -86,7 +87,7 @@ jobs:
                 continue
             fi
             
-            command="java -jar $runjpf_jar +classpath=$jar_file $main_class" 
+            command="gtimeout 3m java -jar $runjpf_jar +classpath=$jar_file $main_class" 
             $command > "./jpf_reports/${main_class}_jpf_report.txt"
         done
 
